@@ -52,6 +52,8 @@ const SUPPORTED_INDEX_TYPES = new Set([
   IndexTypeName.UInt64Index,
 ])
 
+type Size = [number, number]
+
 interface Props {
   element: VegaLiteChartElement
   theme: Theme
@@ -210,12 +212,18 @@ export class ArrowVegaLiteChart extends PureComponent<PropsWithHeight, State> {
 
     spec.config = configWithThemeDefaults(spec.config, theme)
 
-    if (this.props.height) {
-      // fullscreen
-      spec.width = this.props.width - EMBED_PADDING
-      spec.height = this.props.height
-    } else if (useContainerWidth) {
-      spec.width = this.props.width - EMBED_PADDING
+    if (this.props.height || useContainerWidth) {
+      // Adapt chart to viewport width
+      const chartSize = getChartSize(spec, [
+        spec.config.view.continuousWidth,
+        spec.config.view.continuousHeight,
+      ])
+      updateChartSize(
+        spec,
+        chartSize,
+        this.props.width - EMBED_PADDING,
+        this.props.height
+      )
     }
 
     if (!spec.padding) {
@@ -362,6 +370,59 @@ export class ArrowVegaLiteChart extends PureComponent<PropsWithHeight, State> {
         }}
       />
     )
+  }
+}
+
+function getChartSize(spec: any, defaultSize: Size): Size {
+  if ("hconcat" in spec) {
+    // Sum widths & maximum height
+    return spec.hconcat
+      .map((subspec: any) => getChartSize(subspec, defaultSize))
+      .reduce(([w0, h0]: Size, [w1, h1]: Size) => [w0 + w1, Math.max(h0, h1)])
+  }
+
+  if ("vconcat" in spec) {
+    // Maximum width & sum heights
+    return spec.vconcat
+      .map((subspec: any) => getChartSize(subspec, defaultSize))
+      .reduce(([w0, h0]: Size, [w1, h1]: Size) => [Math.max(w0, w1), h0 + h1])
+  }
+
+  // Set width & height for updateChartSize
+  spec.width = spec?.width ?? defaultSize[0]
+  spec.height = spec?.height ?? defaultSize[1]
+  return [spec.width, spec.height]
+}
+
+function updateChartSize(
+  spec: any,
+  chartSize: Size,
+  viewWidth: number,
+  viewHeight: number | undefined
+): void {
+  if ("hconcat" in spec) {
+    spec.hconcat.forEach((subspec: any) =>
+      updateChartSize(
+        subspec,
+        chartSize,
+        viewWidth - EMBED_PADDING,
+        viewHeight
+      )
+    )
+  } else if ("vconcat" in spec) {
+    spec.vconcat.forEach((subspec: any) =>
+      updateChartSize(
+        subspec,
+        chartSize,
+        viewWidth - EMBED_PADDING,
+        viewHeight
+      )
+    )
+  } else {
+    spec.width *= viewWidth / chartSize[0]
+    if (viewHeight) {
+      spec.height *= viewHeight / chartSize[1]
+    }
   }
 }
 
