@@ -21,6 +21,7 @@ from streamlit.proto.Block_pb2 import Block as BlockProto
 import streamlit
 
 SpecType = Union[int, Sequence[Union[int, float]]]
+AlignType = Union["left", "right", "center", "none"]
 
 
 class LayoutsMixin:
@@ -217,6 +218,39 @@ class LayoutsMixin:
         block_proto = BlockProto()
         block_proto.allow_empty = True
         block_proto.expandable.CopyFrom(expandable_proto)
+
+        return self.dg._block(block_proto=block_proto)
+
+    def align(self, align: AlignType, text: Union[bool, AlignType] = False):
+        """ TODO """
+        if align is None:
+            raise StreamlitAPIException('An alignment mode is required for align')
+
+        align_proto = BlockProto.Align()
+
+        if align == 'left':
+            align_proto.align = align_proto.AlignType.LEFT
+        elif align == 'center':
+            align_proto.align = align_proto.AlignType.CENTER
+        elif align == 'right':
+            align_proto.align = align_proto.AlignType.RIGHT
+        else:
+            align_proto.align = align_proto.AlignType.NONE
+
+        if text == 'left':
+            align_proto.text = align_proto.AlignType.LEFT
+        elif text == 'center':
+            align_proto.text = align_proto.AlignType.CENTER
+        elif text == 'right':
+            align_proto.text = align_proto.AlignType.RIGHT
+        elif text:
+            align_proto.text = align_proto.align
+        else:
+            align_proto.text = align_proto.AlignType.NONE
+
+        block_proto = BlockProto()
+        block_proto.allow_empty = True
+        block_proto.align.CopyFrom(align_proto)
 
         return self.dg._block(block_proto=block_proto)
 
