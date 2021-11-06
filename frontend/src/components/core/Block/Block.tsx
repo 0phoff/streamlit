@@ -85,6 +85,7 @@ import withExpandable from "src/hocs/withExpandable"
 import { Form, FormSubmitContent } from "src/components/widgets/Form"
 
 import {
+  StyledAlignBlock,
   StyledBlock,
   StyledColumn,
   StyledElementContainer,
@@ -732,6 +733,43 @@ class Block extends PureComponent<Props> {
             this.props.node.deltaBlock.horizontal.totalWeight || 0
           )}
         </StyledHorizontalBlock>
+      )
+    }
+
+    if (this.props.node.deltaBlock.align) {
+      let align: "flex-start" | "center" | "flex-end"
+      switch (this.props.node.deltaBlock.align.align) {
+        case BlockProto.Align.AlignType.CENTER:
+          align = "center"
+          break
+        case BlockProto.Align.AlignType.RIGHT:
+          align = "flex-end"
+          break
+        default:
+          align = "flex-start"
+          break
+      }
+
+      let text: "left" | "center" | "right" | "inherit"
+      switch (this.props.node.deltaBlock.align.text) {
+        case BlockProto.Align.AlignType.LEFT:
+          text = "left"
+          break
+        case BlockProto.Align.AlignType.CENTER:
+          text = "center"
+          break
+        case BlockProto.Align.AlignType.RIGHT:
+          text = "right"
+          break
+        default:
+          text = "inherit"
+          break
+      }
+
+      return (
+        <StyledAlignBlock align={align} text={text}>
+          <div>{this.renderElements("auto" as any)}</div>
+        </StyledAlignBlock>
       )
     }
 

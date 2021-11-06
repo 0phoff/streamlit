@@ -123,6 +123,21 @@ export const StyledBlock = styled.div<StyledBlockProps>(
   }
 )
 
+export interface StyledAlignProps {
+  align: "flex-start" | "center" | "flex-end"
+  text: "left" | "center" | "right" | "inherit"
+}
+export const StyledAlignBlock = styled.div<StyledAlignProps>(
+  ({ align, text }) => {
+    return {
+      width: "100%",
+      display: "flex",
+      justifyContent: align,
+      textAlign: text,
+    }
+  }
+)
+
 export interface StyledFormProps {
   width: number
   theme: Theme
