@@ -23,9 +23,10 @@ message Block {
     Column column = 3;
     Expandable expandable = 4;
     Form form = 5;
+    Align align = 6;
   }
 
-  bool allow_empty = 6;
+  bool allow_empty = 7;
 
   message Vertical {
   }
@@ -46,5 +47,17 @@ message Block {
   message Form {
     string form_id = 1;
     bool clear_on_submit = 2;
+  }
+
+  message Align {
+    AlignType align = 1;
+    AlignType text = 2;
+
+    enum AlignType {
+      LEFT = 0;
+      CENTER = 1;
+      RIGHT = 2;
+      NONE = 3;
+    }
   }
 }
